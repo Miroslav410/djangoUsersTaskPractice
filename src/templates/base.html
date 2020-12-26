@@ -3,13 +3,24 @@
     <head>
         <title>This is the title</title>
 
-        <div style="border: 2px solid #000;">
-            <h1>This is the header</h1>
-        </div>
+        {% if request.user.is_authenticated %}
+
+            <p> Hello, {{request.user.username}} | <a href="{% url 'logout' %}">Logout</a></p>
+
+        {% else %}
+
+            <p><a href="{% url 'register' %}">Register</a> | <a href="#">Login</a></p>
+
+        {% endif %}
+
+<!--        <div style="border: 2px solid #000;">-->
+            <!--<h1>This is the header</h1>-->
+<!--        </div>-->
+        <hr>
     </head>
 
     <body>
-<!--        <h1>This is the body</h1>-->
+        <!--<h1>This is the body</h1>-->
 
         {% block content %}
 
@@ -18,8 +29,9 @@
     </body>
 
     <footer>
-        <div style="border: 2px solid #000;">
-            <h3>This is the footer</h3>
+        <hr>
+        <div>
+            <h3>Coding example</h3>
         </div>
     </footer>
 </html>

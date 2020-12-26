@@ -1,5 +1,12 @@
-from django.db import models
+from django.db import models, signals
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+
+from django.utils.crypto import get_random_string
+
+from django.contrib.auth.models import User
+
+
+from django.conf import settings
 
 class MyAccountManager(BaseUserManager):
     def create_user(self, email, username, password=None):
@@ -11,6 +18,8 @@ class MyAccountManager(BaseUserManager):
         user = self.model(
             email=self.normalize_email(email),
             username=username,
+
+            employee_id=get_random_string(length=32)
         )
 
         user.set_password(password)
@@ -42,6 +51,7 @@ class Account(AbstractBaseUser):
     is_staff                    = models.BooleanField(default=False)
     is_superuser                = models.BooleanField(default=False)
     # first_name                  = models.CharField(max_length=30)
+    employee_id                 = models.CharField(max_length=32, unique=True, default=True)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username",]
@@ -56,3 +66,20 @@ class Account(AbstractBaseUser):
 
     def has_module_perms(self, app_label):
         return True
+
+    # def user_login_counter(self):
+
+    def login_user(request, user):
+        """
+        Log in a user without requiring credentials (using ``login`` from
+        ``django.contrib.auth``, first finding a matching backend).
+
+        """
+        from django.contrib.auth import load_backend, login
+        if not hasattr(user, 'backend'):
+            for backend in settings.AUTHENTICATION_BACKENDS:
+                if user == load_backend(backend).get_user(user.pk):
+                    user.backend = backend
+                    break
+        if hasattr(user, 'backend'):
+            return login(request, user)
